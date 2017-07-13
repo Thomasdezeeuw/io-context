@@ -12,8 +12,8 @@
 //! [`background context`]: struct.Context.html#method.background
 //!
 //! ```
-//! # extern crate context;
-//! # use context::Context;
+//! # extern crate io_context;
+//! # use io_context::Context;
 //! # use std::io;
 //! fn main() {
 //!     // First create our background context. To this context we could add
@@ -100,8 +100,8 @@
 //! [`add_value`]: struct.Context.html#method.add_value
 //!
 //! ```
-//! # extern crate context;
-//! # use context::Context;
+//! # extern crate io_context;
+//! # use io_context::Context;
 //! fn main() {
 //!     // Create a background context.
 //!     let mut context = Context::background();
@@ -123,8 +123,8 @@
 //! convention`] documentation.
 //!
 //! ```
-//! # extern crate context;
-//! # use context::Context;
+//! # extern crate io_context;
+//! # use io_context::Context;
 //! use std::io;
 //! use std::time::Duration;
 //!
@@ -227,8 +227,8 @@ use std::any::Any;
 /// [`create_child`]: struct.Context.html#method.create_child
 ///
 /// ```
-/// # extern crate context;
-/// # use context::Context;
+/// # extern crate io_context;
+/// # use io_context::Context;
 /// fn main() {
 ///     // First create our parent context.
 ///     let mut parent_ctx = Context::background();
@@ -368,8 +368,8 @@ impl Context {
     /// ## Example
     ///
     /// ```
-    /// # extern crate context;
-    /// # use context::Context;
+    /// # extern crate io_context;
+    /// # use io_context::Context;
     /// # fn do_some_work() {}
     /// use std::time::Duration;
     ///
@@ -415,8 +415,8 @@ impl Context {
     /// In a library or module.
     ///
     /// ```
-    /// # extern crate context;
-    /// # use context::Context;
+    /// # extern crate io_context;
+    /// # use io_context::Context;
     /// # fn main() {} // To let the example compile.
     /// # pub type RequestId = u64;
     /// // The key used in `Context`. This should be private.
@@ -436,8 +436,8 @@ impl Context {
     /// In the application code.
     ///
     /// ```
-    /// # extern crate context;
-    /// # use context::Context;
+    /// # extern crate io_context;
+    /// # use io_context::Context;
     /// # pub type RequestId = u64;
     /// # pub fn add_request_id(ctx: &mut Context, request_id: RequestId) {}
     /// # pub fn get_request_id(ctx: &Context) -> Option<RequestId> { Some(123) }
