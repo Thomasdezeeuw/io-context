@@ -9,6 +9,9 @@
 A context that carries a deadline, cancelation signals and request scoped values
 across API boundaries and between processes.
 
-See the [`API documentation`] for more.
+This is heavily inspired by [Go's context package].
 
-[`API documentation`]: https://docs.rs/io-context
+See the [API documentation] for more.
+
+[API documentation]: https://docs.rs/io-context
+[Go's context package]: https://golang.org/pkg/context/
