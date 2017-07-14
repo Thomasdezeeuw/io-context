@@ -279,14 +279,16 @@ mod tests;
 /// [`Debug`]: https://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html
 /// [`Hash`]: https://doc.rust-lang.org/nightly/core/hash/trait.Hash.html
 pub struct Context {
-    /// An optional parent context.
+    /// An optional parent context. Only a context created with
+    /// `Context::background` will have this set to `None`.
     parent: Option<Arc<Context>>,
-    /// Wether or not this context is canceled.
+    /// Wether or not this context is canceled. After this is set to false it
+    /// can't be set to true after. An `Arc` is needed because the context can
+    /// create multiple `CancelFunc`s.
     canceled: Arc<AtomicBool>,
     /// An optional deadline.
     deadline: Option<Instant>,
-    /// A collection of values stored in this context. It shares these values
-    /// with all child contexts and so there read only.
+    /// A collection of read only values stored in this context.
     values: HashMap<&'static str, Box<Any + Send + Sync>>,
 }
 
