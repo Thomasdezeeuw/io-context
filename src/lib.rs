@@ -33,7 +33,7 @@
 //!
 //!         // Read a request.
 //!         let request = read_request();
-//!         // Pas the request_context along with the request to the requst
+//!         // Pass the request_context along with the request to the request
 //!         // handler.
 //!         let response = handle_request(request_context, request).unwrap();
 //!         println!("got response: {:?}", response);
