@@ -15,8 +15,18 @@ fn assert_size<T>(want: usize) {
 fn assertions() {
     assert_send::<Context>();
     assert_sync::<Context>();
-    // TODO: fix this:
     //assert_size::<Context>(72);
+
+    use std::any::Any;
+    use std::collections::HashMap;
+    use std::time::Instant;
+    use std::sync::Arc;
+    use std::sync::atomic::AtomicBool;
+
+    assert_size::<Option<Arc<Context>>>(8);
+    assert_size::<Arc<AtomicBool>>(8);
+    assert_size::<Option<Instant>>(16);
+    assert_size::<HashMap<&'static str, Box<Any + Send + Sync>>>(40);
 
     assert_send::<DoneReason>();
     assert_sync::<DoneReason>();
