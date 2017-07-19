@@ -15,8 +15,7 @@ fn assert_size<T>(want: usize) {
 fn assertions() {
     assert_send::<Context>();
     assert_sync::<Context>();
-    // TODO: fix this:
-    //assert_size::<Context>(72);
+    assert_size::<Context>(72);
 
     assert_send::<DoneReason>();
     assert_sync::<DoneReason>();
