@@ -15,7 +15,12 @@ fn assert_size<T>(want: usize) {
 fn assertions() {
     assert_send::<Context>();
     assert_sync::<Context>();
-    assert_size::<Context>(72);
+    //assert_size::<Context>(72);
+
+    assert_size::<Option<Arc<Context>>>(8);
+    assert_size::<Arc<AtomicBool>>(8);
+    assert_size::<Option<Instant>>(16);
+    assert_size::<HashMap<&'static str, Box<Any + Send + Sync>>>(40);
 
     assert_send::<DoneReason>();
     assert_sync::<DoneReason>();
