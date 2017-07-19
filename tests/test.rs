@@ -1,7 +1,9 @@
-use std::mem;
-use std::thread;
+extern crate io_context;
 
-use super::*;
+use std::{io, mem, thread};
+use std::time::Duration;
+
+use io_context::*;
 
 fn assert_send<T: Send>() {}
 fn assert_sync<T: Sync>() {}

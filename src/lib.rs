@@ -193,9 +193,6 @@ use std::{fmt, io};
 use std::time::{Duration, Instant};
 use std::any::Any;
 
-#[cfg(test)]
-mod tests;
-
 /// A context that carries a deadline, cancelation signals and request scoped
 /// values across API boundaries and between processes.
 ///
