@@ -475,7 +475,8 @@ impl Context {
     ///
     /// [`create_child`]: struct.Context.html#method.create_child
     /// [`Context`]: struct.Context.html#child-contexts
-    pub fn freeze(self) -> Arc<Context> {
+    pub fn freeze(mut self) -> Arc<Context> {
+        self.values.shrink_to_fit();
         Arc::new(self)
     }
 
