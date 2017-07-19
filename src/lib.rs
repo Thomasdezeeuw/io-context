@@ -291,9 +291,9 @@ pub struct Context {
 
 impl Context {
     /// Create an empty background context. It has no deadline or cancelation
-    /// functions attached to it. It should be used as the top-level context of
-    /// which children should be derived on a per request basis. See
-    /// the [`crate documentation`] for a detailed example.
+    /// signals attached to it. It should be used as the top-level context of
+    /// which children should be derived on a per request basis. See the [`crate
+    /// documentation`] for a detailed example.
     ///
     /// [`crate documentation`]: index.html
     pub fn background() -> Context {
