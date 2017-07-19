@@ -17,6 +17,12 @@ fn assertions() {
     assert_sync::<Context>();
     //assert_size::<Context>(72);
 
+    use std::any::Any;
+    use std::collections::HashMap;
+    use std::time::Instant;
+    use std::sync::Arc;
+    use std::sync::atomic::AtomicBool;
+
     assert_size::<Option<Arc<Context>>>(8);
     assert_size::<Arc<AtomicBool>>(8);
     assert_size::<Option<Instant>>(16);
