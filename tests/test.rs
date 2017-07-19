@@ -15,8 +15,13 @@ fn assert_size<T>(want: usize) {
 fn assertions() {
     assert_send::<Context>();
     assert_sync::<Context>();
-    // TODO: fix this:
-    //assert_size::<Context>(72);
+    // The reference to the parent context is 8 bytes, canceled 8, deadline is
+    // 24 bytes on Linx and 16 on other platforms (?), the hashmap is 40 bytes.
+    #[cfg(target_os="linux")]
+    let want = 8 + 8 + 24 + 40;
+    #[cfg(not(target_os="linux"))]
+    let want = 8 + 8 + 16 + 40;
+    assert_size::<Context>(want);
 
     assert_send::<DoneReason>();
     assert_sync::<DoneReason>();
