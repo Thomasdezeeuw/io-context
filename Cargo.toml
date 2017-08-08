@@ -2,7 +2,10 @@
 name = "io-context"
 version = "0.1.0"
 authors = ["Thomas de Zeeuw <thomasdezeeuw@gmail.com>"]
-description = "A context that carries a deadline, cancelation signals and request scoped values across API boundaries and between processes."
+description = """
+A context that carries a deadline, cancelation signals and request scoped values
+across API boundaries and between processes.
+"""
 documentation = "https://docs.rs/io-context"
 repository = "https://github.com/Thomasdezeeuw/io-context"
 readme = "README.md"
