@@ -86,9 +86,12 @@
 //!
 //! Contexts should not stored in structs. Instead functions and methods that
 //! need a context should accept it as first parameter. For more conventions see
-//! the [`Context convention`] documentation.
+//! the [`Context convention`] documentation. A possible exception for this is a
+//! struct that implements a [`Future`], which represents the state of that
+//! future.
 //!
 //! [`Context convention`]: struct.Context.html#conventions
+//! [`Future`]: https://docs.rs/futures/*/futures/future/trait.Future.html
 //!
 //! # Usage
 //!
