@@ -286,7 +286,7 @@ pub struct Context {
     /// An optional deadline.
     deadline: Option<Instant>,
     /// A collection of read only values stored in this context.
-    values: HashMap<&'static str, Box<Any + Send + Sync>>,
+    values: Option<HashMap<&'static str, Box<Any + Send + Sync>>>,
 }
 
 impl Context {
@@ -301,7 +301,7 @@ impl Context {
             parent: None,
             canceled: Arc::new(AtomicBool::new(false)),
             deadline: None,
-            values: HashMap::new(),
+            values: None,
         }
     }
 
@@ -346,7 +346,12 @@ impl Context {
     pub fn add_value<V>(&mut self, key: &'static str, value: V)
         where V: Any + Send + Sync + Sized,
     {
-        self.values.insert(key, Box::new(value));
+        if let Some(ref mut values) = self.values {
+            values.insert(key, Box::new(value));
+        } else {
+            self.values = Some(HashMap::new());
+            self.add_value(key, value)
+        }
     }
 
     /// Get the deadline for this operation, if any. This is mainly useful for
@@ -455,15 +460,18 @@ impl Context {
     pub fn get_value<V>(&self, key: &'static str) -> Option<&V>
         where V: Any + Send + Sync + Sized,
     {
-        match self.values.get(&key) {
-            Some(value) => {
-                let value: &Any = &**value;
-                value.downcast_ref::<V>()
-            },
-            _ => match self.parent {
-                Some(ref parent_ctx) => parent_ctx.get_value(key),
-                _ => None,
-            },
+        if let Some(ref values) = self.values {
+            match values.get(&key) {
+                Some(value) => {
+                    let value: &Any = &**value;
+                    return value.downcast_ref::<V>();
+                },
+                _ => (),
+            }
+        }
+        match self.parent {
+            Some(ref parent_ctx) => parent_ctx.get_value(key),
+            _ => None,
         }
     }
 
@@ -476,7 +484,9 @@ impl Context {
     /// [`create_child`]: struct.Context.html#method.create_child
     /// [`Context`]: struct.Context.html#child-contexts
     pub fn freeze(mut self) -> Arc<Context> {
-        self.values.shrink_to_fit();
+        if let Some(ref mut values) = self.values {
+            values.shrink_to_fit();
+        }
         Arc::new(self)
     }
 
@@ -491,7 +501,7 @@ impl Context {
             parent: Some(Arc::clone(parent_ctx)),
             canceled: Arc::new(AtomicBool::new(false)),
             deadline: parent_ctx.deadline,
-            values: HashMap::new(),
+            values: None,
         }
     }
 }
