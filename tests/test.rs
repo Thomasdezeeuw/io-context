@@ -22,12 +22,15 @@ fn assert_size<T>(want: usize) {
 fn assertions() {
     assert_send::<Context>();
     assert_sync::<Context>();
-    // The reference to the parent context is 8 bytes, canceled 8, deadline is
-    // 24 bytes on Linx and 16 on other platforms (?), the hashmap is 40 bytes.
+    // The `time::Instant` has a different size on Linux.
     #[cfg(target_os="linux")]
-    let want = 8 + 8 + 24 + 40;
+    let time_size = 16;
     #[cfg(not(target_os="linux"))]
-    let want = 8 + 8 + 16 + 40;
+    let time_size = 8;
+    #[cfg(target_pointer_width="64")]
+    let want = 64 + time_size;
+    #[cfg(target_pointer_width="32")]
+    let want = 48 + time_size;
     assert_size::<Context>(want);
 
     assert_send::<DoneReason>();
