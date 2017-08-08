@@ -23,8 +23,6 @@ environment:
     - channel: nightly
       target: x86_64-pc-windows-gnu
     - channel: nightly
-      target: x86_64-pc-windows-gnu
-    - channel: nightly
       target: i686-pc-windows-gnu
 build: off
 install:
