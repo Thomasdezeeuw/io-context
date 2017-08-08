@@ -11,7 +11,7 @@ repository = "https://github.com/Thomasdezeeuw/io-context"
 readme = "README.md"
 keywords = ["context", "io", "request", "server"]
 categories = ["network-programming", "web-programming", "concurrency"]
-license = "MIT"
+license = "MIT/Apache-2.0"
 
 [badges]
 travis-ci = { repository = "Thomasdezeeuw/io-context" }
