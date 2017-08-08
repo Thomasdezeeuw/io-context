@@ -41,10 +41,10 @@ fn assertions() {
 #[test]
 fn canceling_context() {
     let mut ctx = Context::background();
-    let cancel = ctx.add_cancel_signal();
+    let cancel_signal = ctx.add_cancel_signal();
     assert_eq!(ctx.done(), None);
 
-    cancel();
+    cancel_signal.cancel();
     assert_eq!(ctx.done(), Some(DoneReason::Canceled));
 }
 
@@ -52,11 +52,11 @@ fn canceling_context() {
 fn canceling_child_should_not_affect_parent() {
     let ctx = Context::background().freeze();
     let mut child_ctx = Context::create_child(&ctx);
-    let cancel = child_ctx.add_cancel_signal();
+    let cancel_signal = child_ctx.add_cancel_signal();
     assert_eq!(child_ctx.done(), None);
     assert_eq!(ctx.done(), None);
 
-    cancel();
+    cancel_signal.cancel();
     assert_eq!(child_ctx.done(), Some(DoneReason::Canceled));
     assert_eq!(ctx.done(), None);
 }
@@ -67,11 +67,11 @@ fn canceling_child_should_not_affect_parent_add_cancel_signal() {
     ctx.add_cancel_signal();
     let ctx = ctx.freeze();
     let mut child_ctx = Context::create_child(&ctx);
-    let cancel = child_ctx.add_cancel_signal();
+    let cancel_signal = child_ctx.add_cancel_signal();
     assert_eq!(child_ctx.done(), None);
     assert_eq!(ctx.done(), None);
 
-    cancel();
+    cancel_signal.cancel();
     assert_eq!(child_ctx.done(), Some(DoneReason::Canceled));
     assert_eq!(ctx.done(), None);
 }
@@ -79,13 +79,13 @@ fn canceling_child_should_not_affect_parent_add_cancel_signal() {
 #[test]
 fn canceling_parent_should_affect_child() {
     let mut ctx = Context::background();
-    let cancel = ctx.add_cancel_signal();
+    let cancel_signal = ctx.add_cancel_signal();
     let ctx = ctx.freeze();
     let child_ctx = Context::create_child(&ctx);
     assert_eq!(child_ctx.done(), None);
     assert_eq!(ctx.done(), None);
 
-    cancel();
+    cancel_signal.cancel();
     assert_eq!(child_ctx.done(), Some(DoneReason::Canceled));
     assert_eq!(ctx.done(), Some(DoneReason::Canceled));
 }
@@ -93,14 +93,14 @@ fn canceling_parent_should_affect_child() {
 #[test]
 fn canceling_parent_should_affect_child_add_cancel_signal() {
     let mut ctx = Context::background();
-    let cancel = ctx.add_cancel_signal();
+    let cancel_signal = ctx.add_cancel_signal();
     let ctx = ctx.freeze();
     let mut child_ctx = Context::create_child(&ctx);
     child_ctx.add_cancel_signal();
     assert_eq!(child_ctx.done(), None);
     assert_eq!(ctx.done(), None);
 
-    cancel();
+    cancel_signal.cancel();
     assert_eq!(child_ctx.done(), Some(DoneReason::Canceled));
     assert_eq!(ctx.done(), Some(DoneReason::Canceled));
 }

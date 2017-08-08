@@ -27,7 +27,7 @@
 //!     // signal handling, e.g. when the user pressed ctrl-c.
 //!     let mut ctx = Context::background();
 //!     // This function should be called once ctrl-c is pressed.
-//!     let cancel = ctx.add_cancel_signal();
+//!     let cancel_signal = ctx.add_cancel_signal();
 //!     let ctx = ctx.freeze();
 //!     loop {
 //!         // Create a context for our request. This will copy any deadlines
@@ -115,10 +115,10 @@
 //!
 //!     // Add cancelation to the context. We can use this to respond to a
 //!     // kill signal from the user, e.g. when pressing ctrl-c.
-//!     let cancel = ctx.add_cancel_signal();
+//!     let cancel_signal = ctx.add_cancel_signal();
 //!
 //!     // ... Some time later when we received a kill signal.
-//!     cancel(); // Now the context and it's children will be canceled.
+//!     cancel_signal.cancel(); // Now the context and it's children will be canceled.
 //! }
 //! ```
 //!
@@ -240,7 +240,7 @@ use std::any::Any;
 ///     // First create our parent context.
 ///     let mut parent_ctx = Context::background();
 ///     // We can use this `cancel_all` function to handle ctrl-c.
-///     let cancel_all = parent_ctx.add_cancel_signal();
+///     let parent_cancel_signal = parent_ctx.add_cancel_signal();
 ///     // Now we freeze the parent context so it can be used to create child
 ///     // contexts.
 ///     let parent_ctx = parent_ctx.freeze();
@@ -248,17 +248,17 @@ use std::any::Any;
 ///     // Create child context from the parent context.
 ///     let mut child_ctx = Context::create_child(&parent_ctx);
 ///     // Add a cancel signal to the child context.
-///     let cancel_child = child_ctx.add_cancel_signal();
+///     let child_cancel_signal = child_ctx.add_cancel_signal();
 ///
 ///     // Oh no! the connection was closed, now we need to cancel the child
 ///     // context. This will only cancel the child context.
-///     cancel_child();
+///     child_cancel_signal.cancel();
 ///     assert!(child_ctx.done().is_some());
 ///     assert!(parent_ctx.done().is_none()); // Parent context is still going strong.
 ///
 ///     // Now the user pressed ctrl-c and we'll cancel the parent context and
 ///     // it's child context.
-///     cancel_all();
+///     parent_cancel_signal.cancel();
 ///     assert!(child_ctx.done().is_some());
 ///     assert!(parent_ctx.done().is_some());
 /// }
@@ -312,14 +312,15 @@ impl Context {
         }
     }
 
-    /// Add cancelation to the context. The function that is returned will
-    /// cancel the context and it's children once called. A single
+    /// Add cancelation to the context. The signalthat is returned will cancel
+    /// the context and it's children once called (see [`cancel`]). A single
     /// context can have multiple cancelation functions, after calling a
     /// cancelation function the other functions will have no effect.
+    ///
+    /// [`cancel`]: struct.CancelSignal.html#method.cancel
     pub fn add_cancel_signal(&mut self) -> CancelSignal {
         let canceled = Arc::clone(&self.canceled);
-        // TODO: see if we can relax the ordering.
-        Box::new(move || { canceled.store(true, Ordering::SeqCst); })
+        CancelSignal::new(canceled)
     }
 
     /// Add a deadline to the context. If the current deadline is sooner then
@@ -513,11 +514,30 @@ impl Context {
     }
 }
 
-/// A cancelation signal, see [`Context.add_cancel_signal`].
+/// A cancelation signal, see [`Context.add_cancel_signal`]. See the crate
+/// documentation for an example.
 ///
 /// [`Context.add_cancel_signal`]: struct.Context.html#method.add_cancel_signal
-// TODO: try to remove the box, if at all possible.
-pub type CancelSignal = Box<Fn()>;
+/// [`crate documentation`]: index.html
+pub struct CancelSignal {
+    /// A reference to the canceled value of a context.
+    canceled: Arc<AtomicBool>,
+}
+
+impl CancelSignal {
+    /// Create a new `CancelSignal`.
+    fn new(canceled: Arc<AtomicBool>) -> CancelSignal {
+        CancelSignal {
+            canceled: canceled,
+        }
+    }
+
+    /// Cancel the context.
+    pub fn cancel(self) {
+        // TODO: see if we can relax the ordering.
+        self.canceled.store(true, Ordering::SeqCst);
+    }
+}
 
 /// The reason why a context was stopped, see [`Context.done`]. This "error"
 /// can be turned into an [`io::Error`] by using the [`Into`] trait.
