@@ -36,13 +36,13 @@
 //!         //
 //!         // However adding a deadline or cancelation function to the client
 //!         // will not after the background context.
-//!         let request_context = Context::create_child(&ctx);
+//!         let request_ctx = Context::create_child(&ctx);
 //!
 //!         // Read a request.
 //!         let request = read_request();
-//!         // Pass the request_context along with the request to the request
+//!         // Pass the request context along with the request to the request
 //!         // handler.
-//!         let response = handle_request(request_context, request).unwrap();
+//!         let response = handle_request(request_ctx, request).unwrap();
 //!         println!("got response: {:?}", response);
 //!         # break; // Don't loop forever while testing.
 //!     }
@@ -111,11 +111,11 @@
 //! # use io_context::Context;
 //! fn main() {
 //!     // Create a background context.
-//!     let mut context = Context::background();
+//!     let mut ctx = Context::background();
 //!
 //!     // Add cancelation to the context. We can use this to respond to a
 //!     // kill signal from the user, e.g. when pressing ctrl-c.
-//!     let cancel = context.add_cancel_signal();
+//!     let cancel = ctx.add_cancel_signal();
 //!
 //!     // ... Some time later when we received a kill signal.
 //!     cancel(); // Now the context and it's children will be canceled.
