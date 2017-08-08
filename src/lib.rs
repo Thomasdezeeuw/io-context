@@ -288,7 +288,7 @@ pub struct Context {
     parent: Option<Arc<Context>>,
     /// Wether or not this context is canceled. After this is set to false it
     /// can't be set to true after. An `Arc` is needed because the context can
-    /// create multiple `CancelFunc`s.
+    /// create multiple `CancelSignal`s.
     canceled: Arc<AtomicBool>,
     /// An optional deadline.
     deadline: Option<Instant>,
@@ -316,7 +316,7 @@ impl Context {
     /// cancel the context and it's children once called. A single
     /// context can have multiple cancelation functions, after calling a
     /// cancelation function the other functions will have no effect.
-    pub fn add_cancel_signal(&mut self) -> CancelFunc {
+    pub fn add_cancel_signal(&mut self) -> CancelSignal {
         let canceled = Arc::clone(&self.canceled);
         // TODO: see if we can relax the ordering.
         Box::new(move || { canceled.store(true, Ordering::SeqCst); })
@@ -513,11 +513,11 @@ impl Context {
     }
 }
 
-/// A cancelation function, see [`Context.add_cancel_signal`].
+/// A cancelation signal, see [`Context.add_cancel_signal`].
 ///
 /// [`Context.add_cancel_signal`]: struct.Context.html#method.add_cancel_signal
 // TODO: try to remove the box, if at all possible.
-pub type CancelFunc = Box<Fn()>;
+pub type CancelSignal = Box<Fn()>;
 
 /// The reason why a context was stopped, see [`Context.done`]. This "error"
 /// can be turned into an [`io::Error`] by using the [`Into`] trait.
