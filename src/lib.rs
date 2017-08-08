@@ -12,8 +12,8 @@
 //! [`background context`]. While outgoing requests to servers should accept a
 //! `Context` in there methods to allow for cancelation and deadlines. A chain
 //! of funtions calls for handling a request should propagate the `Context`,
-//! optionally adding their own deadlines or cancelation functions. As
-//! demostrated in the example below.
+//! optionally adding their own deadlines or cancelation signals. As demostrated
+//! in the example below.
 //!
 //! [`Context`]: struct.Context.html
 //! [`background context`]: struct.Context.html#method.background
@@ -26,15 +26,15 @@
 //!     // First create our background context. To this context we could add
 //!     // signal handling, e.g. when the user pressed ctrl-c.
 //!     let mut ctx = Context::background();
-//!     // This function should be called once ctrl-c is pressed.
+//!     // This signal should be canceled once ctrl-c is pressed.
 //!     let cancel_signal = ctx.add_cancel_signal();
 //!     let ctx = ctx.freeze();
 //!     loop {
 //!         // Create a context for our request. This will copy any deadlines
-//!         // and cancelation functions from the background context into the
+//!         // and cancelation signals from the background context into the
 //!         // request specific one.
 //!         //
-//!         // However adding a deadline or cancelation function to the client
+//!         // However adding a deadline or cancelation signal to the client
 //!         // will not after the background context.
 //!         let request_ctx = Context::create_child(&ctx);
 //!
@@ -177,9 +177,9 @@
 //!     let ctx = ctx.freeze();
 //!
 //!     // We create a new child context just for the specific operation. Any
-//!     // deadlines or cancelation function added to the parent will be added
+//!     // deadlines or cancelation signals added to the parent will be added
 //!     // to the child context as well. However any deadlines or cancelation
-//!     // functions added to the child will not affect the parent.
+//!     // signals added to the child will not affect the parent.
 //!     let mut child_ctx = Context::create_child(&ctx);
 //!     child_ctx.add_timeout(Duration::from_secs(1));
 //!
@@ -206,8 +206,8 @@ use std::any::Any;
 /// A context that carries a deadline, cancelation signals and request scoped
 /// values across API boundaries and between processes.
 ///
-/// A cancelation signal (function) can be added using the [`add_cancel_signal`]
-/// method. Deadlines and timeouts can be added using the [`add_deadline`] and
+/// A cancelation signal can be added using the [`add_cancel_signal`] method.
+/// Deadlines and timeouts can be added using the [`add_deadline`] and
 /// [`add_timeout`] methods. While [`add_value`] adds a value to the context.
 ///
 /// For more information and examples see the crate level documentation.
@@ -242,7 +242,7 @@ use std::any::Any;
 /// fn main() {
 ///     // First create our parent context.
 ///     let mut parent_ctx = Context::background();
-///     // We can use this `cancel_all` function to handle ctrl-c.
+///     // We can use this `cancel_all` signal to handle ctrl-c.
 ///     let parent_cancel_signal = parent_ctx.add_cancel_signal();
 ///     // Now we freeze the parent context so it can be used to create child
 ///     // contexts.
@@ -317,8 +317,8 @@ impl Context {
 
     /// Add cancelation to the context. The signalthat is returned will cancel
     /// the context and it's children once called (see [`cancel`]). A single
-    /// context can have multiple cancelation functions, after calling a
-    /// cancelation function the other functions will have no effect.
+    /// context can have multiple cancelation signals, after executing a
+    /// cancelation the other signals will have no effect.
     ///
     /// [`cancel`]: struct.CancelSignal.html#method.cancel
     pub fn add_cancel_signal(&mut self) -> CancelSignal {
@@ -327,7 +327,7 @@ impl Context {
     }
 
     /// Add a deadline to the context. If the current deadline is sooner then
-    /// the provided deadline this function does nothing.
+    /// the provided deadline this method does nothing.
     ///
     /// See [`done`] for example usage.
     ///
