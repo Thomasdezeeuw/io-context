@@ -194,6 +194,23 @@
 //! # fn work_step_3() {}
 //! # fn rollback() {}
 //! ```
+//!
+//! ## When should a Context be used?
+//!
+//! A `Context` is mainly useful if an operation is long running. As a rule of
+//! thumb; if an operation is less then 10 milliseconds it is not worth it to
+//! add a `Context` to the operation.
+//!
+//! Examples of when adding a `Context` is worth it:
+//!
+//! * Any operation which involve any kind of I/O (network, disk or otherwise).
+//! * Any operation which support cancelation or timeouts already.
+//! * Long looping operations which process input in batches.
+//!
+//! The common theme in the example operations above is the fact that they all
+//! could be or are long running. If you, both as a developer and user of your
+//! application, would like more control over these kind of operations the use
+//! of a `Context` is a good fit.
 
 use std::collections::HashMap;
 use std::error::Error;
