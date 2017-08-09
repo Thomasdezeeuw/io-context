@@ -475,8 +475,8 @@ impl Context {
     /// # extern crate io_context;
     /// # use io_context::Context;
     /// # pub type RequestId = u64;
-    /// # pub fn add_request_id(ctx: &mut Context, request_id: RequestId) {}
-    /// # pub fn get_request_id(ctx: &Context) -> Option<RequestId> { Some(123) }
+    /// # pub fn add_request_id(_ctx: &mut Context, _request_id: RequestId) {}
+    /// # pub fn get_request_id(_ctx: &Context) -> Option<RequestId> { Some(123) }
     /// fn main() {
     ///     // Create our new context.
     ///     let mut ctx = Context::background();
