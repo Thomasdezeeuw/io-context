@@ -247,6 +247,18 @@ fn retrieving_values_from_parent_context() {
 }
 
 #[test]
+fn retrieving_a_value_with_an_incorrect_type_should_not_work() {
+    static KEY_1: &'static str = "key 1";
+    let value_1: String = "some string".to_owned();
+
+    let mut ctx = Context::background();
+    ctx.add_value(KEY_1, value_1.clone());
+
+    assert_eq!(ctx.get_value::<u8>(KEY_1), None);
+    assert_eq!(ctx.get_value(KEY_1), Some(&value_1));
+}
+
+#[test]
 fn creating_a_long_family_line_should_work() {
     let parent_ctx = Context::background().freeze();
     let mut child_ctx = Context::create_child(&parent_ctx).freeze();
