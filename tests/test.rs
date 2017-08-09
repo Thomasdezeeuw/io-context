@@ -259,6 +259,36 @@ fn retrieving_a_value_with_an_incorrect_type_should_not_work() {
 }
 
 #[test]
+fn adding_values_should_overwrite_the_old_one() {
+    static KEY_1: &'static str = "key 1";
+    let value_1: String = "some string".to_owned();
+    let value_2: u64 = 10;
+
+    let mut parent_ctx = Context::background();
+    parent_ctx.add_value(KEY_1, value_1);
+    parent_ctx.add_value(KEY_1, value_2);
+
+    assert_eq!(parent_ctx.get_value(KEY_1), Some(&value_2));
+}
+
+#[test]
+fn adding_values_should_not_overwrite_parent_context_values() {
+    static KEY_1: &'static str = "key 1";
+    let value_1: String = "some string".to_owned();
+    let value_2: u64 = 10;
+
+    let mut parent_ctx = Context::background();
+    parent_ctx.add_value(KEY_1, value_1.clone());
+    let parent_ctx = parent_ctx.freeze();
+
+    let mut child_ctx = Context::create_child(&parent_ctx);
+    child_ctx.add_value(KEY_1, value_2);
+
+    assert_eq!(parent_ctx.get_value(KEY_1), Some(&value_1));
+    assert_eq!(child_ctx.get_value(KEY_1), Some(&value_2));
+}
+
+#[test]
 fn creating_a_long_family_line_should_work() {
     let parent_ctx = Context::background().freeze();
     let mut child_ctx = Context::create_child(&parent_ctx).freeze();
