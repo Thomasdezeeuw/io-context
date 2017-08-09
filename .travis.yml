@@ -12,4 +12,5 @@ script:
   - cargo --version
   - rustc --version
   - cargo build --verbose
-  - cargo test --verbose
+  - cargo test --verbose --no-default-features
+  - cargo test --verbose --all-features
