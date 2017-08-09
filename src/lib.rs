@@ -532,6 +532,17 @@ impl Context {
     }
 }
 
+impl fmt::Debug for Context {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        f.debug_struct("Context")
+            .field("parent", &self.parent)
+            .field("cancled", &self.canceled)
+            .field("deadline", &self.deadline)
+            .field("values", &self.values.as_ref().map(|_| "values"))
+            .finish()
+    }
+}
+
 /// A cancelation signal, see [`Context.add_cancel_signal`]. See the crate
 /// documentation for an example.
 ///

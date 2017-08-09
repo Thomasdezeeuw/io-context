@@ -7,13 +7,14 @@
 
 extern crate io_context;
 
-use std::{io, mem, thread};
+use std::{fmt, io, mem, thread};
 use std::time::{Duration, Instant};
 
 use io_context::*;
 
 fn assert_send<T: Send>() {}
 fn assert_sync<T: Sync>() {}
+fn assert_debug<T: fmt::Debug>() {}
 fn assert_size<T>(want: usize) {
     assert_eq!(mem::size_of::<T>(), want);
 }
@@ -22,6 +23,7 @@ fn assert_size<T>(want: usize) {
 fn assertions() {
     assert_send::<Context>();
     assert_sync::<Context>();
+    assert_debug::<Context>();
     // The `time::Instant` has a different size on Linux.
     #[cfg(target_os="linux")]
     let time_size = 16;
@@ -35,6 +37,7 @@ fn assertions() {
 
     assert_send::<DoneReason>();
     assert_sync::<DoneReason>();
+    assert_debug::<DoneReason>();
     assert_size::<DoneReason>(1);
 }
 
