@@ -313,6 +313,45 @@ fn creating_alot_of_children_from_a_single_parent_should_work() {
 }
 
 #[test]
+fn concurrent_usage() {
+    const KEY: &'static str = "key 1";
+    const VALUE: u64 = 123;
+
+    let mut background_ctx = Context::background();
+    background_ctx.add_timeout(Duration::from_millis(20));
+    background_ctx.add_value(KEY, VALUE);
+    let background_ctx = background_ctx.freeze();
+
+    let child_ctx1 = Context::create_child(&background_ctx);
+    let child_ctx2 = Context::create_child(&background_ctx);
+
+    let handle1 = thread::spawn(move || {
+        let mut ctx = child_ctx1;
+        assert_eq!(ctx.get_value(KEY), Some(&VALUE));
+        ctx.add_deadline(Instant::now());
+
+        match ctx.done() {
+            Some(DoneReason::DeadlineExceeded) => return,
+            _ => panic!("context deadline not exceeded"),
+        }
+    });
+
+    let handle2 = thread::spawn(move || {
+        let mut ctx = child_ctx2;
+        assert_eq!(ctx.get_value(KEY), Some(&VALUE));
+        ctx.add_cancel_signal().cancel();
+
+        match ctx.done() {
+            Some(DoneReason::Canceled) => return,
+            _ => panic!("context was not cancelled"),
+        }
+    });
+
+    assert!(handle1.join().is_ok());
+    assert!(handle2.join().is_ok());
+}
+
+#[test]
 fn done_reason() {
     assert_eq!(DoneReason::DeadlineExceeded.to_string(), "context deadline exceeded".to_owned());
     assert_eq!(DoneReason::Canceled.to_string(), "context canceled".to_owned());
