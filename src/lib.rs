@@ -606,13 +606,13 @@ impl fmt::Display for DoneReason {
     }
 }
 
-impl Into<io::Error> for DoneReason {
-    fn into(self) -> io::Error {
+impl From<DoneReason> for io::Error {
+    fn from(reason: DoneReason) -> Self {
         use self::DoneReason::*;
-        let kind = match self {
+        let kind = match reason {
             DeadlineExceeded => io::ErrorKind::TimedOut,
             Canceled => io::ErrorKind::Other,
         };
-        io::Error::new(kind, self.description())
+        io::Error::new(kind, reason.description())
     }
 }
