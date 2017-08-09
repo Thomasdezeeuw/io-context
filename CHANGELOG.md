@@ -6,6 +6,8 @@
   not make an allocation for them).
 * Changed the `CancelFunc` type to `CancelSignal` struct. This removes the need
   for an allocation.
+* Implemented the `Debug` trait for `Context`.
+* Add `DoneReason.into_error` method.
 * Shrink values when freezing the context.
 * Increase test coverage.
 
