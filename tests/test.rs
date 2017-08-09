@@ -119,6 +119,28 @@ fn canceling_parent_should_affect_child_add_cancel_signal() {
 }
 
 #[test]
+fn canceling_child_should_affect_not_sibling() {
+    let ctx = Context::background().freeze();
+    let mut child_ctx1 = Context::create_child(&ctx);
+    let mut child_ctx2 = Context::create_child(&ctx);
+    let cancel_signal1 = child_ctx1.add_cancel_signal();
+    let cancel_signal2 = child_ctx2.add_cancel_signal();
+    assert_eq!(ctx.done(), None);
+    assert_eq!(child_ctx1.done(), None);
+    assert_eq!(child_ctx2.done(), None);
+
+    cancel_signal1.cancel();
+    assert_eq!(ctx.done(), None);
+    assert_eq!(child_ctx1.done(), Some(DoneReason::Canceled));
+    assert_eq!(child_ctx2.done(), None);
+
+    cancel_signal2.cancel();
+    assert_eq!(ctx.done(), None);
+    assert_eq!(child_ctx1.done(), Some(DoneReason::Canceled));
+    assert_eq!(child_ctx2.done(), Some(DoneReason::Canceled));
+}
+
+#[test]
 fn adding_a_deadline_to_the_context() {
     let timeout = Duration::from_millis(20);
     let mut ctx = Context::background();
