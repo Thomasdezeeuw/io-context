@@ -49,6 +49,19 @@ fn canceling_context() {
 }
 
 #[test]
+fn canceling_context_twice_does_nothing() {
+    let mut ctx = Context::background();
+    let cancel_signal1 = ctx.add_cancel_signal();
+    let cancel_signal2 = ctx.add_cancel_signal();
+    assert_eq!(ctx.done(), None);
+
+    cancel_signal1.cancel();
+    assert_eq!(ctx.done(), Some(DoneReason::Canceled));
+    cancel_signal2.cancel();
+    assert_eq!(ctx.done(), Some(DoneReason::Canceled));
+}
+
+#[test]
 fn canceling_child_should_not_affect_parent() {
     let ctx = Context::background().freeze();
     let mut child_ctx = Context::create_child(&ctx);
