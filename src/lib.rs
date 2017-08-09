@@ -490,12 +490,9 @@ impl Context {
         where V: Any + Send + Sync + Sized,
     {
         if let Some(ref values) = self.values {
-            match values.get(&key) {
-                Some(value) => {
-                    let value: &Any = &**value;
-                    return value.downcast_ref::<V>();
-                },
-                _ => (),
+            if let Some(value) = values.get(&key) {
+                let value: &Any = &**value;
+                return value.downcast_ref::<V>();
             }
         }
         match self.parent {
