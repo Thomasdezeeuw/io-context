@@ -8,7 +8,7 @@
 extern crate io_context;
 
 use std::{io, mem, thread};
-use std::time::Duration;
+use std::time::{Duration, Instant};
 
 use io_context::*;
 
@@ -144,11 +144,16 @@ fn canceling_child_should_affect_not_sibling() {
 fn adding_a_deadline_to_the_context() {
     let timeout = Duration::from_millis(20);
     let mut ctx = Context::background();
-    // TODO: better testing of the returned deadline.
     assert!(ctx.deadline().is_none());
+    let want = Instant::now() + timeout;
     ctx.add_timeout(timeout);
     assert_eq!(ctx.done(), None);
-    assert!(ctx.deadline().is_some());
+    if let Some(got) = ctx.deadline() {
+        let difference = got.duration_since(want);
+        assert!(difference < Duration::from_millis(1));
+    } else {
+        panic!("expected a deadline, but didn't got one");
+    }
 
     thread::sleep(timeout);
     assert_eq!(ctx.done(), Some(DoneReason::DeadlineExceeded));
