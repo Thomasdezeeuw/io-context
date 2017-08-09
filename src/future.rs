@@ -15,12 +15,45 @@ use super::{Context, DoneReason};
 /// [`Stream`] or [`Sink`]. On every poll call of the future/stream/sink it will
 /// check if the [`Context`] is [`done`] first.
 ///
+/// Because [`io::Error`] implements [`From<DoneReason>`] you can use
+/// `io::Error` as an error using this wrapper.
+///
+/// # Example
+///
+/// ```
+/// # extern crate futures;
+/// # extern crate io_context;
+/// use std::io;
+/// use std::error::Error;
+/// use futures::future::{Future, ok};
+/// use io_context::{Context, ContextFuture};
+///
+/// fn main() {
+///     // Create our context with a cancelation signal.
+///     let mut ctx = Context::background();
+///     let cancel_signal = ctx.add_cancel_signal();
+///
+///     // First create a future which always returns `Ok(1)`, then wrap it
+///     // using `ContextFuture`.
+///     let future = ok::<u8, io::Error>(1);
+///     let mut future = ContextFuture::new_future(ctx, future);
+///
+///     // Now we'll cancel the context, and we'll get an `io::Error` that says
+///     // that the context was canceled. We'll get `DoneReason::Canceled`,
+///     // which is converted into an `io::Error`.
+///     cancel_signal.cancel();
+///     assert_eq!(future.poll().unwrap_err().description(), "context canceled");
+/// }
+/// ```
+///
 /// [`futures`]: https://docs.rs/futures/*/futures/
 /// [`Future`]: https://docs.rs/futures/*/futures/future/trait.Future.html
 /// [`Stream`]: https://docs.rs/futures/*/futures/stream/trait.Stream.html
 /// [`Sink`]: https://docs.rs/futures/*/futures/sink/trait.Sink.html
 /// [`Context`]: struct.Context.html
 /// [`done`]: struct.Context.html#method.done
+/// [`io::Error`]: https://doc.rust-lang.org/nightly/std/io/struct.Error.html
+/// [`From<DoneReason>`]: enum.DoneReason.html
 pub struct ContextFuture<T> {
     ctx: Context,
     inner: T,
