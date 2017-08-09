@@ -223,6 +223,30 @@ fn adding_complex_values_to_the_context() {
 }
 
 #[test]
+fn retrieving_values_from_parent_context() {
+    static KEY_1: &'static str = "key 1";
+    let value_1: String = "some string".to_owned();
+
+    static KEY_2: &'static str = "key 2";
+    let value_2: u64 = 10;
+
+    let mut parent_ctx = Context::background();
+    assert!(parent_ctx.get_value::<String>(KEY_1).is_none());
+    assert!(parent_ctx.get_value::<u8>(KEY_2).is_none());
+
+    parent_ctx.add_value(KEY_1, value_1.clone());
+    let parent_ctx = parent_ctx.freeze();
+
+    let mut child_ctx = Context::create_child(&parent_ctx);
+    child_ctx.add_value(KEY_2, value_2);
+
+    assert_eq!(parent_ctx.get_value(KEY_1), Some(&value_1));
+    assert_eq!(parent_ctx.get_value::<u8>(KEY_2), None);
+    assert_eq!(child_ctx.get_value(KEY_1), Some(&value_1));
+    assert_eq!(child_ctx.get_value(KEY_2), Some(&value_2));
+}
+
+#[test]
 fn creating_a_long_family_line_should_work() {
     let parent_ctx = Context::background().freeze();
     let mut child_ctx = Context::create_child(&parent_ctx).freeze();
