@@ -16,3 +16,10 @@ license = "MIT/Apache-2.0"
 [badges]
 travis-ci = { repository = "Thomasdezeeuw/io-context" }
 appveyor = { repository = "Thomasdezeeuw/io-context", service = "github" }
+
+[features]
+default = []
+context-future = ["futures"]
+
+[dependencies]
+futures = { version = "0.1", optional = true }

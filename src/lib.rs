@@ -212,6 +212,9 @@
 //! application, would like more control over these kind of operations the use
 //! of a `Context` is a good fit.
 
+#[cfg(feature = "context-future")]
+extern crate futures;
+
 use std::{fmt, io};
 use std::any::Any;
 use std::collections::HashMap;
@@ -219,6 +222,11 @@ use std::error::Error;
 use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::time::{Duration, Instant};
+
+#[cfg(feature = "context-future")]
+mod future;
+#[cfg(feature = "context-future")]
+pub use future::ContextFuture;
 
 /// A context that carries a deadline, cancelation signals and request scoped
 /// values across API boundaries and between processes.
