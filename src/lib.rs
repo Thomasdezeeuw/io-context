@@ -212,13 +212,13 @@
 //! application, would like more control over these kind of operations the use
 //! of a `Context` is a good fit.
 
+use std::{fmt, io};
+use std::any::Any;
 use std::collections::HashMap;
 use std::error::Error;
 use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, Ordering};
-use std::{fmt, io};
 use std::time::{Duration, Instant};
-use std::any::Any;
 
 /// A context that carries a deadline, cancelation signals and request scoped
 /// values across API boundaries and between processes.
