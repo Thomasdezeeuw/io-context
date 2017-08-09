@@ -360,4 +360,25 @@ fn done_reason() {
     assert_eq!(DoneReason::Canceled.to_string(), "context canceled".to_owned());
     assert_eq!(Into::<io::Error>::into(DoneReason::DeadlineExceeded).to_string(), "context deadline exceeded".to_owned());
     assert_eq!(Into::<io::Error>::into(DoneReason::Canceled).to_string(), "context canceled".to_owned());
+
+    enum IoErrorWrapper {
+        Io(io::Error),
+    }
+
+    impl From<io::Error> for IoErrorWrapper {
+        fn from(err: io::Error) -> Self {
+            IoErrorWrapper::Io(err)
+        }
+    }
+
+    impl fmt::Display for IoErrorWrapper {
+        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+            match *self {
+                IoErrorWrapper::Io(ref err) => write!(f, "IoErrorWrapper({})", err),
+            }
+        }
+    }
+
+    assert_eq!(DoneReason::Canceled.into_error::<IoErrorWrapper>().to_string(),
+        "IoErrorWrapper(context canceled)".to_owned());
 }

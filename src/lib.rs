@@ -583,6 +583,13 @@ pub enum DoneReason {
     Canceled,
 }
 
+impl DoneReason {
+    /// Convert the `DoneReason` into an error.
+    pub fn into_error<E>(self) -> E where E: From<io::Error> {
+        Into::<io::Error>::into(self).into()
+    }
+}
+
 impl Error for DoneReason {
     fn description(&self) -> &str {
         use self::DoneReason::*;
