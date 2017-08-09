@@ -375,6 +375,7 @@ impl Context {
         where V: Any + Send + Sync + Sized,
     {
         if let Some(ref mut values) = self.values {
+            // TODO: what if `V` is already boxed, can be reuse to box somehow?
             values.insert(key, Box::new(value));
         } else {
             self.values = Some(HashMap::new());
