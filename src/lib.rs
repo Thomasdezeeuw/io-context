@@ -576,12 +576,14 @@ impl CancelSignal {
     }
 }
 
-/// The reason why a context was stopped, see [`Context.done`]. This "error"
-/// can be turned into an [`io::Error`] by using the [`Into`] trait.
+/// The reason why a context was stopped, see [`Context.done`]. This "error" can
+/// be turned into an [`io::Error`] by using the [`Into`] trait
+/// ([`From`]`<DoneReason>` is implemented for [`io::Error`]).
 ///
 /// [`Context.done`]: struct.Context.html#method.done
 /// [`io::Error`]: https://doc.rust-lang.org/nightly/std/io/struct.Error.html
 /// [`Into`]: https://doc.rust-lang.org/nightly/core/convert/trait.Into.html
+/// [`From`]: https://doc.rust-lang.org/nightly/core/convert/trait.From.html
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
 pub enum DoneReason {
     /// The deadline was exceeded.
