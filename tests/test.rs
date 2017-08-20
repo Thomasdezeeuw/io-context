@@ -335,6 +335,9 @@ fn concurrent_usage() {
         assert_eq!(ctx.get_value(KEY), Some(&VALUE));
         ctx.add_deadline(Instant::now());
 
+        // Make sure the deadline is exceeded.
+        thead::sleep(Duration::from_millis(5));
+
         match ctx.done() {
             Some(DoneReason::DeadlineExceeded) => return,
             _ => panic!("context deadline not exceeded"),
