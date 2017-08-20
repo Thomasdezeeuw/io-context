@@ -454,6 +454,50 @@ impl Context {
         }
     }
 
+    /// This does the same thing as [`done`], but returns a `Result` instead so
+    /// it can be used with the [`Try`] operator (`?`). For usage see the
+    /// example below.
+    ///
+    /// ## Example
+    ///
+    /// ```
+    /// # extern crate io_context;
+    /// # use io_context::Context;
+    /// use std::io;
+    /// use std::time::Duration;
+    ///
+    /// fn main() {
+    ///     let mut ctx = Context::background();
+    ///     ctx.add_timeout(Duration::from_secs(5));
+    ///     loop {
+    ///         match do_some_work(&ctx) {
+    ///             Ok(()) => (),
+    ///             Err(err) => {
+    ///                 println!("work stopped: {}", err);
+    ///                 break;
+    ///             },
+    ///         }
+    ///         # break;
+    ///     }
+    /// }
+    ///
+    /// fn do_some_work(ctx: &Context) -> Result<(), io::Error> {
+    ///     ctx.is_done()?;
+    ///
+    ///     // Do some work.
+    ///     Ok(())
+    /// }
+    /// ```
+    ///
+    /// [`done`]: struct.Context.html#method.done
+    /// [`Try`]: https://doc.rust-lang.org/nightly/core/ops/trait.Try.html
+    pub fn is_done(&self) -> Result<(), DoneReason> {
+        match self.done() {
+            Some(reason) => Err(reason),
+            None => Ok(()),
+        }
+    }
+
     /// Get a value from the context. If no value is stored in the `Context`
     /// under the provided `key`, or if the stored value doesn't have type `V`,
     /// this will return `None`.

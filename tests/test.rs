@@ -46,9 +46,11 @@ fn canceling_context() {
     let mut ctx = Context::background();
     let cancel_signal = ctx.add_cancel_signal();
     assert_eq!(ctx.done(), None);
+    assert_eq!(ctx.is_done(), Ok(()));
 
     cancel_signal.cancel();
     assert_eq!(ctx.done(), Some(DoneReason::Canceled));
+    assert_eq!(ctx.is_done(), Err(DoneReason::Canceled));
 }
 
 #[test]
