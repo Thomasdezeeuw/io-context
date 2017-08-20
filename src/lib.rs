@@ -382,12 +382,20 @@ impl Context {
     pub fn add_value<V>(&mut self, key: &'static str, value: V)
         where V: Any + Send + Sync + Sized,
     {
+        self.add_boxed_value(key, Box::new(value))
+    }
+
+    /// This method does the same thing as [`add_value`], but reuses the `Box`.
+    ///
+    /// [`add_value`]: struct.Context.html#method.add_value
+    pub fn add_boxed_value<V>(&mut self, key: &'static str, value: Box<V>)
+        where V: Any + Send + Sync + Sized,
+    {
         if let Some(ref mut values) = self.values {
-            // TODO: what if `V` is already boxed, can be reuse to box somehow?
-            values.insert(key, Box::new(value));
+            values.insert(key, value);
         } else {
             self.values = Some(HashMap::new());
-            self.add_value(key, value)
+            self.add_boxed_value(key, value)
         }
     }
 
