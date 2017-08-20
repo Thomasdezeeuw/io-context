@@ -10,6 +10,9 @@
 * Add `DoneReason.into_error` method.
 * Shrink values when freezing the context.
 * Increase test coverage.
+* add `ContextFuture`; a `Future`/`Stream`/`Sink` wrapper.
+* add `Context.add_boxed_value`; reusing a `Box`ed value in adding it to the
+  context.
 
 # v0.1.0
 
