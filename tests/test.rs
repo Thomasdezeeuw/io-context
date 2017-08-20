@@ -336,7 +336,7 @@ fn concurrent_usage() {
         ctx.add_deadline(Instant::now());
 
         // Make sure the deadline is exceeded.
-        thead::sleep(Duration::from_millis(5));
+        thread::sleep(Duration::from_millis(5));
 
         match ctx.done() {
             Some(DoneReason::DeadlineExceeded) => return,
