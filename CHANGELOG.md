@@ -10,9 +10,10 @@
 * Add `DoneReason.into_error` method.
 * Shrink values when freezing the context.
 * Increase test coverage.
-* add `ContextFuture`; a `Future`/`Stream`/`Sink` wrapper.
-* add `Context.add_boxed_value`; reusing a `Box`ed value in adding it to the
+* added `ContextFuture`; a `Future`/`Stream`/`Sink` wrapper.
+* added `Context.add_boxed_value`; reusing a `Box`ed value in adding it to the
   context.
+* Added `Context.is_done`; return an `Result` rather then `Some`.
 
 # v0.1.0
 
