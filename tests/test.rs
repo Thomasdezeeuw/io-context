@@ -323,7 +323,6 @@ fn concurrent_usage() {
     const VALUE: u64 = 123;
 
     let mut background_ctx = Context::background();
-    background_ctx.add_timeout(Duration::from_millis(20));
     background_ctx.add_value(KEY, VALUE);
     let background_ctx = background_ctx.freeze();
 
