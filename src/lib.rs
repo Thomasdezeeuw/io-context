@@ -616,9 +616,7 @@ pub struct CancelSignal {
 impl CancelSignal {
     /// Create a new `CancelSignal`.
     fn new(canceled: Arc<AtomicBool>) -> CancelSignal {
-        CancelSignal {
-            canceled: canceled,
-        }
+        CancelSignal { canceled: canceled }
     }
 
     /// Cancel the context.

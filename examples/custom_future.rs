@@ -12,7 +12,7 @@ extern crate io_context;
 #[cfg(feature = "context-future")]
 fn main() {
     use io_context::{Context, ContextFuture, DoneReason};
-    use futures::{Future, Async};
+    use futures::{Async, Future};
     use futures::future::poll_fn;
 
     let mut ctx = Context::background();

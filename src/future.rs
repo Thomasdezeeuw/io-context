@@ -7,7 +7,7 @@
 
 use std::fmt;
 
-use futures::{Poll, Future, Stream, Sink, StartSend};
+use futures::{Future, Poll, Sink, StartSend, Stream};
 
 use super::{Context, DoneReason};
 

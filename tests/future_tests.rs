@@ -7,14 +7,14 @@
 
 #[cfg(feature = "context-future")]
 mod tests {
-    extern crate io_context;
     extern crate futures;
+    extern crate io_context;
 
-    use std::{io, fmt, mem};
+    use std::{fmt, io, mem};
     use std::error::Error;
 
     use self::io_context::*;
-    use self::futures::{stream, future, Async, AsyncSink, Poll, StartSend};
+    use self::futures::{future, stream, Async, AsyncSink, Poll, StartSend};
 
     fn assert_send<T: Send>() {}
     fn assert_sync<T: Sync>() {}
@@ -85,10 +85,12 @@ mod tests {
         assert!(sink.start_send(1).is_ok());
         assert!(sink.poll_complete().is_ok());
         cancel_signal.cancel();
-        assert_eq!(sink.poll_complete().unwrap_err().description(),
-            Into::<io::Error>::into(DoneReason::Canceled).description());
+        assert_eq!(
+            sink.poll_complete().unwrap_err().description(),
+            Into::<io::Error>::into(DoneReason::Canceled).description()
+        );
     }
 }
 
 #[cfg(feature = "context-future")]
-pub use::tests::*;
+pub use tests::*;

@@ -25,13 +25,13 @@ fn assertions() {
     assert_sync::<Context>();
     assert_debug::<Context>();
     // The `time::Instant` has a different size on Linux.
-    #[cfg(target_os="linux")]
+    #[cfg(target_os = "linux")]
     let time_size = 16;
-    #[cfg(not(target_os="linux"))]
+    #[cfg(not(target_os = "linux"))]
     let time_size = 8;
-    #[cfg(target_pointer_width="64")]
+    #[cfg(target_pointer_width = "64")]
     let want = 64 + time_size;
-    #[cfg(target_pointer_width="32")]
+    #[cfg(target_pointer_width = "32")]
     let want = 48 + time_size;
     assert_size::<Context>(want);
 
