@@ -340,40 +340,6 @@ impl Context {
         }
     }
 
-    /// Add cancelation to the context. The signalthat is returned will cancel
-    /// the context and it's children once called (see [`cancel`]). A single
-    /// context can have multiple cancelation signals, after executing a
-    /// cancelation the other signals will have no effect.
-    ///
-    /// [`cancel`]: struct.CancelSignal.html#method.cancel
-    pub fn add_cancel_signal(&mut self) -> CancelSignal {
-        let canceled = Arc::clone(&self.canceled);
-        CancelSignal::new(canceled)
-    }
-
-    /// Add a deadline to the context. If the current deadline is sooner then
-    /// the provided deadline this method does nothing.
-    ///
-    /// See [`done`] for example usage.
-    ///
-    /// [`done`]: struct.Context.html#method.done
-    pub fn add_deadline(&mut self, deadline: Instant) {
-        match self.deadline {
-            Some(current_deadline) if current_deadline < deadline => (),
-            _ => self.deadline = Some(deadline),
-        }
-    }
-
-    /// A convience method to add a deadline to the context which is the current
-    /// time plus the `timeout`.
-    ///
-    /// See [`done`] for example usage.
-    ///
-    /// [`done`]: struct.Context.html#method.done
-    pub fn add_timeout(&mut self, timeout: Duration) {
-        self.add_deadline(Instant::now() + timeout)
-    }
-
     /// Add a value to the context. It overwrites any previously set values with
     /// the same key. Because of this it's advised to keep `key` private in a
     /// library or module, see [`get_value`] for more.
@@ -399,6 +365,92 @@ impl Context {
         }
     }
 
+    /// Get a value from the context. If no value is stored in the `Context`
+    /// under the provided `key`, or if the stored value doesn't have type `V`,
+    /// this will return `None`.
+    ///
+    /// Rather then letting the user of a library retrieve a value from the
+    /// `Context` manually, a library or module should define `add_to_context`
+    /// and `get_from_context` functions, like in the example below.
+    ///
+    /// ## Example
+    ///
+    /// In a library or module.
+    ///
+    /// ```
+    /// # extern crate io_context;
+    /// # use io_context::Context;
+    /// # fn main() {} // To let the example compile.
+    /// # pub type RequestId = u64;
+    /// // The key used in `Context`. This should be private.
+    /// const REQUEST_ID_KEY: &'static str = "MY_LIBRARY_REQUEST_ID_KEY";
+    ///
+    /// /// Add a `RequestId` to the provided `Context`.
+    /// pub fn add_request_id(ctx: &mut Context, request_id: RequestId) {
+    ///     ctx.add_value(REQUEST_ID_KEY, request_id)
+    /// }
+    ///
+    /// /// Retrieve a `RequestId` from the provided `Context`.
+    /// pub fn get_request_id(ctx: &Context) -> Option<&RequestId> {
+    ///     ctx.get_value(REQUEST_ID_KEY)
+    /// }
+    /// ```
+    ///
+    /// In the application code.
+    ///
+    /// ```
+    /// # extern crate io_context;
+    /// # use io_context::Context;
+    /// # pub type RequestId = u64;
+    /// # pub fn add_request_id(_ctx: &mut Context, _request_id: RequestId) {}
+    /// # pub fn get_request_id(_ctx: &Context) -> Option<RequestId> { Some(123) }
+    /// fn main() {
+    ///     // Create our new context.
+    ///     let mut ctx = Context::background();
+    ///     // Add our `RequestId` to it.
+    ///     add_request_id(&mut ctx, 123);
+    ///     // Retrieve our `RequestId` later on.
+    ///     assert_eq!(get_request_id(&ctx), Some(123));
+    /// }
+    /// ```
+    pub fn get_value<V>(&self, key: &'static str) -> Option<&V>
+        where V: Any + Send + Sync + Sized,
+    {
+        if let Some(ref values) = self.values {
+            if let Some(value) = values.get(&key) {
+                let value: &Any = &**value;
+                return value.downcast_ref::<V>();
+            }
+        }
+        match self.parent {
+            Some(ref parent_ctx) => parent_ctx.get_value(key),
+            _ => None,
+        }
+    }
+
+    /// Add a deadline to the context. If the current deadline is sooner then
+    /// the provided deadline this method does nothing.
+    ///
+    /// See [`done`] for example usage.
+    ///
+    /// [`done`]: struct.Context.html#method.done
+    pub fn add_deadline(&mut self, deadline: Instant) {
+        match self.deadline {
+            Some(current_deadline) if current_deadline < deadline => (),
+            _ => self.deadline = Some(deadline),
+        }
+    }
+
+    /// A convience method to add a deadline to the context which is the current
+    /// time plus the `timeout`.
+    ///
+    /// See [`done`] for example usage.
+    ///
+    /// [`done`]: struct.Context.html#method.done
+    pub fn add_timeout(&mut self, timeout: Duration) {
+        self.add_deadline(Instant::now() + timeout)
+    }
+
     /// Get the deadline for this operation, if any. This is mainly useful for
     /// checking if a long job should be started or not, e.g. if a job takes 5
     /// seconds to execute and only 1 second is left on the deadline we're
@@ -410,6 +462,17 @@ impl Context {
     /// [`done`]: struct.Context.html#method.done
     pub fn deadline(&self) -> Option<Instant> {
         self.deadline
+    }
+
+    /// Add cancelation to the context. The signalthat is returned will cancel
+    /// the context and it's children once called (see [`cancel`]). A single
+    /// context can have multiple cancelation signals, after executing a
+    /// cancelation the other signals will have no effect.
+    ///
+    /// [`cancel`]: struct.CancelSignal.html#method.cancel
+    pub fn add_cancel_signal(&mut self) -> CancelSignal {
+        let canceled = Arc::clone(&self.canceled);
+        CancelSignal::new(canceled)
     }
 
     /// Check if the context is done. If it returns `None` the operation may
@@ -495,69 +558,6 @@ impl Context {
         match self.done() {
             Some(reason) => Err(reason),
             None => Ok(()),
-        }
-    }
-
-    /// Get a value from the context. If no value is stored in the `Context`
-    /// under the provided `key`, or if the stored value doesn't have type `V`,
-    /// this will return `None`.
-    ///
-    /// Rather then letting the user of a library retrieve a value from the
-    /// `Context` manually, a library or module should define `add_to_context`
-    /// and `get_from_context` functions, like in the example below.
-    ///
-    /// ## Example
-    ///
-    /// In a library or module.
-    ///
-    /// ```
-    /// # extern crate io_context;
-    /// # use io_context::Context;
-    /// # fn main() {} // To let the example compile.
-    /// # pub type RequestId = u64;
-    /// // The key used in `Context`. This should be private.
-    /// const REQUEST_ID_KEY: &'static str = "MY_LIBRARY_REQUEST_ID_KEY";
-    ///
-    /// /// Add a `RequestId` to the provided `Context`.
-    /// pub fn add_request_id(ctx: &mut Context, request_id: RequestId) {
-    ///     ctx.add_value(REQUEST_ID_KEY, request_id)
-    /// }
-    ///
-    /// /// Retrieve a `RequestId` from the provided `Context`.
-    /// pub fn get_request_id(ctx: &Context) -> Option<&RequestId> {
-    ///     ctx.get_value(REQUEST_ID_KEY)
-    /// }
-    /// ```
-    ///
-    /// In the application code.
-    ///
-    /// ```
-    /// # extern crate io_context;
-    /// # use io_context::Context;
-    /// # pub type RequestId = u64;
-    /// # pub fn add_request_id(_ctx: &mut Context, _request_id: RequestId) {}
-    /// # pub fn get_request_id(_ctx: &Context) -> Option<RequestId> { Some(123) }
-    /// fn main() {
-    ///     // Create our new context.
-    ///     let mut ctx = Context::background();
-    ///     // Add our `RequestId` to it.
-    ///     add_request_id(&mut ctx, 123);
-    ///     // Retrieve our `RequestId` later on.
-    ///     assert_eq!(get_request_id(&ctx), Some(123));
-    /// }
-    /// ```
-    pub fn get_value<V>(&self, key: &'static str) -> Option<&V>
-        where V: Any + Send + Sync + Sized,
-    {
-        if let Some(ref values) = self.values {
-            if let Some(value) = values.get(&key) {
-                let value: &Any = &**value;
-                return value.downcast_ref::<V>();
-            }
-        }
-        match self.parent {
-            Some(ref parent_ctx) => parent_ctx.get_value(key),
-            _ => None,
         }
     }
 
